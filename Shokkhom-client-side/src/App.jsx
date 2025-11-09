@@ -13,7 +13,7 @@ function App() {
       <Route path="/property" element={<Property />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
-      {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+      <Route path="/admin" element={<AdminDashboard />} />
     </Routes>
   );
 }
