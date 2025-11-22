@@ -1,5 +1,10 @@
 import { validationResult } from 'express-validator';
 import Task from '../models/Task.model.js';
+import {
+  notifyTaskAssigned,
+  notifyUrgentTask,
+  notifyTaskCompleted
+} from '../utils/notificationService.js';
 
 // @desc    Create new task
 // @route   POST /api/tasks
@@ -21,6 +26,22 @@ export const createTask = async (req, res) => {
     });
 
     await task.populate('createdBy assignedTo', 'name email');
+
+    // Send notifications for important events
+    try {
+      // Notify assigned user if different from creator
+      if (task.assignedTo._id.toString() !== task.createdBy._id.toString()) {
+        await notifyTaskAssigned(task, task.assignedTo._id);
+      }
+
+      // Notify about urgent tasks
+      if (task.priority === 'urgent') {
+        await notifyUrgentTask(task);
+      }
+    } catch (notifError) {
+      console.error('Notification error:', notifError);
+      // Don't fail task creation if notification fails
+    }
 
     res.status(201).json({
       success: true,
@@ -150,26 +171,54 @@ export const updateTask = async (req, res) => {
       });
     }
 
-    // Check if agent can update this task
-    if (req.user.role === 'agent' && 
-        task.createdBy.toString() !== req.user._id.toString() &&
-        task.assignedTo.toString() !== req.user._id.toString()) {
+    // Only super_admin, creator, or assigned user can update task
+    const isCreator = task.createdBy.toString() === req.user._id.toString();
+    const isAssigned = task.assignedTo.toString() === req.user._id.toString();
+    const isSuperAdmin = req.user.role === 'super_admin';
+
+    if (!isSuperAdmin && !isCreator && !isAssigned) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this task'
       });
     }
 
-    // Agents can only update status, not reassign tasks
-    if (req.user.role === 'agent' && req.body.assignedTo) {
+    // Only assigned user can change status (or super_admin)
+    if (req.body.status && !isSuperAdmin && !isAssigned) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the assigned user can change task status'
+      });
+    }
+
+    // Non-admins cannot reassign tasks
+    if (req.user.role !== 'super_admin' && req.user.role !== 'admin' && req.body.assignedTo) {
       delete req.body.assignedTo;
     }
+
+    // Track if task is being reassigned
+    const oldAssignedTo = task.assignedTo.toString();
+    const newAssignedTo = req.body.assignedTo;
 
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     ).populate('createdBy assignedTo', 'name email');
+
+    // Notify if task is reassigned to a different user
+    if (newAssignedTo && newAssignedTo !== oldAssignedTo) {
+      try {
+        await notifyTaskAssigned(updatedTask, newAssignedTo);
+        
+        // If priority changed to urgent, notify about that too
+        if (req.body.priority === 'urgent' && task.priority !== 'urgent') {
+          await notifyUrgentTask(updatedTask);
+        }
+      } catch (notifError) {
+        console.error('Notification error:', notifError);
+      }
+    }
 
     res.json({
       success: true,
@@ -199,12 +248,14 @@ export const deleteTask = async (req, res) => {
       });
     }
 
-    // Only creator or admin can delete
-    if (req.user.role === 'agent' && 
-        task.createdBy.toString() !== req.user._id.toString()) {
+    // Only creator or super_admin can delete
+    const isCreator = task.createdBy.toString() === req.user._id.toString();
+    const isSuperAdmin = req.user.role === 'super_admin';
+
+    if (!isSuperAdmin && !isCreator) {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to delete this task'
+        message: 'Only the task creator can delete this task'
       });
     }
 
@@ -237,6 +288,17 @@ export const markTaskComplete = async (req, res) => {
       });
     }
 
+    // Only assigned user or super_admin can mark task complete
+    const isAssigned = task.assignedTo.toString() === req.user._id.toString();
+    const isSuperAdmin = req.user.role === 'super_admin';
+
+    if (!isSuperAdmin && !isAssigned) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the assigned user can change task status'
+      });
+    }
+
     // Toggle completion status
     const newStatus = task.status === 'completed' ? 'pending' : 'completed';
     task.status = newStatus;
@@ -248,6 +310,15 @@ export const markTaskComplete = async (req, res) => {
     }
 
     await task.save();
+
+    // Notify task creator when task is completed
+    if (newStatus === 'completed') {
+      try {
+        await notifyTaskCompleted(task, task.createdBy);
+      } catch (notifError) {
+        console.error('Notification error:', notifError);
+      }
+    }
 
     res.json({
       success: true,

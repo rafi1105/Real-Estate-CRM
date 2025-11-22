@@ -9,7 +9,10 @@ import {
   updateProfile,
   changePassword,
   getAllUsers,
-  createStaffUser
+  createStaffUser,
+  updateUser,
+  deleteUser,
+  toggleUserStatus
 } from '../controllers/auth.controller.js';
 import { authenticate, superAdminOnly } from '../middleware/auth.middleware.js';
 
@@ -70,5 +73,14 @@ router.post('/create-staff', authenticate, superAdminOnly, [
   body('address').optional().trim(),
   body('role').isIn(['admin', 'agent']).withMessage('Role must be admin or agent')
 ], createStaffUser);
+
+// Update user (Super Admin only)
+router.put('/users/:id', authenticate, superAdminOnly, updateUser);
+
+// Delete user (Super Admin only)
+router.delete('/users/:id', authenticate, superAdminOnly, deleteUser);
+
+// Toggle user status (Super Admin only)
+router.patch('/users/:id/status', authenticate, superAdminOnly, toggleUserStatus);
 
 export default router;

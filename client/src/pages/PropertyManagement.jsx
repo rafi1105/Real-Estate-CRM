@@ -26,6 +26,11 @@ const PropertyManagement = () => {
     imageUrl: '',
     publishedToFrontend: false
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
     fetchProperties();
@@ -137,6 +142,28 @@ const PropertyManagement = () => {
     setShowEditModal(false);
   };
 
+  // Filter and search logic
+  const filteredProperties = properties.filter(property => {
+    // Search filter
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm || 
+      property.name?.toLowerCase().includes(searchLower) ||
+      property.location?.toLowerCase().includes(searchLower) ||
+      property.description?.toLowerCase().includes(searchLower);
+
+    // Type filter
+    const matchesType = filterType === 'all' || property.type === filterType;
+
+    // Status filter
+    const matchesStatus = filterStatus === 'all' || property.status === filterStatus;
+
+    // Price range filter
+    const matchesMinPrice = !minPrice || property.price >= Number(minPrice);
+    const matchesMaxPrice = !maxPrice || property.price <= Number(maxPrice);
+
+    return matchesSearch && matchesType && matchesStatus && matchesMinPrice && matchesMaxPrice;
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminNavbar />
@@ -146,17 +173,177 @@ const PropertyManagement = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Property Management</h1>
-            <p className="text-gray-600 mt-1">Add, edit, and manage all properties</p>
+            <p className="text-gray-600 mt-1">{user?.role === 'agent' ? 'View assigned properties' : 'Add, edit, and manage all properties'}</p>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Add Property</span>
-          </button>
+          {user?.role !== 'agent' && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Property</span>
+            </button>
+          )}
+        </div>
+
+        {/* Search and Filter Bar */}
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            {/* Search */}
+            <div className="lg:col-span-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search by name, location, or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <svg
+                  className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Type Filter */}
+            <div>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Types</option>
+                <option value="Apartment">Apartment</option>
+                <option value="House">House</option>
+                <option value="Villa">Villa</option>
+                <option value="Land">Land</option>
+                <option value="Commercial">Commercial</option>
+              </select>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Status</option>
+                <option value="available">Available</option>
+                <option value="sold">Sold</option>
+                <option value="pending">Pending</option>
+                <option value="rented">Rented</option>
+              </select>
+            </div>
+
+            {/* Min Price */}
+            <div>
+              <input
+                type="number"
+                placeholder="Min Price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Max Price */}
+            <div>
+              <input
+                type="number"
+                placeholder="Max Price"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {(searchTerm || filterType !== 'all' || filterStatus !== 'all' || minPrice || maxPrice) && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-gray-600 font-medium">Active Filters:</span>
+              {searchTerm && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  Search: "{searchTerm}"
+                  <button onClick={() => setSearchTerm('')} className="hover:text-blue-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {filterType !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                  Type: {filterType}
+                  <button onClick={() => setFilterType('all')} className="hover:text-purple-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {filterStatus !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                  Status: {filterStatus}
+                  <button onClick={() => setFilterStatus('all')} className="hover:text-green-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {minPrice && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">
+                  Min: ${Number(minPrice).toLocaleString()}
+                  <button onClick={() => setMinPrice('')} className="hover:text-orange-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {maxPrice && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+                  Max: ${Number(maxPrice).toLocaleString()}
+                  <button onClick={() => setMaxPrice('')} className="hover:text-red-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterType('all');
+                  setFilterStatus('all');
+                  setMinPrice('');
+                  setMaxPrice('');
+                }}
+                className="text-sm text-red-600 hover:text-red-800 font-medium"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+
+          {/* Results Count */}
+          <div className="mt-4 text-sm text-gray-600">
+            Showing {filteredProperties.length} of {properties.length} properties
+          </div>
         </div>
 
         {/* Properties Table */}
@@ -166,9 +353,13 @@ const PropertyManagement = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading properties...</p>
             </div>
-          ) : properties.length === 0 ? (
+          ) : filteredProperties.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-gray-600">No properties found. Add your first property to get started.</p>
+              <p className="text-gray-600">
+                {properties.length === 0 
+                  ? 'No properties found. Add your first property to get started.'
+                  : 'No properties match your filters. Try adjusting your search criteria.'}
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -185,7 +376,7 @@ const PropertyManagement = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {properties.map((property) => (
+                  {filteredProperties.map((property) => (
                     <tr key={property._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{property.name}</div>
@@ -211,18 +402,24 @@ const PropertyManagement = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleEdit(property)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(property._id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
+                        {user?.role === 'agent' ? (
+                          <span className="text-gray-500 italic">View Only</span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleEdit(property)}
+                              className="text-blue-600 hover:text-blue-900 mr-4"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(property._id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -21,11 +21,14 @@ const TaskManager = () => {
   });
 
   useEffect(() => {
-    fetchTasks();
     if (user?.role === 'super_admin' || user?.role === 'admin') {
+      fetchTasks();
       fetchUsers();
+    } else if (user?.role === 'agent') {
+      fetchMyTasks();
     }
   }, [user]);
+
 
   const fetchTasks = async () => {
     try {
@@ -35,6 +38,19 @@ const TaskManager = () => {
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast.error('Failed to load tasks');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMyTasks = async () => {
+    try {
+      setLoading(true);
+      const response = await taskAPI.getMyTasks();
+      setTasks(response.data.tasks || response.data || []);
+    } catch (error) {
+      console.error('Error fetching my tasks:', error);
+      toast.error('Failed to load my tasks');
     } finally {
       setLoading(false);
     }
@@ -277,7 +293,8 @@ const TaskManager = () => {
                             type="checkbox"
                             checked={task.status === 'completed'}
                             onChange={(e) => handleStatusChange(task._id, e.target.checked ? 'completed' : 'pending')}
-                            className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            disabled={user?.role !== 'super_admin' && task.assignedTo?._id !== user?._id}
+                            className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                           
                           <div className="flex-1">
@@ -315,7 +332,7 @@ const TaskManager = () => {
                         </div>
 
                         {/* Actions */}
-                        {(user?.role === 'super_admin' || user?.role === 'admin' || task.assignedTo === user?._id) && (
+                        {(user?.role === 'super_admin' || task.assignedTo?._id === user?._id) && (
                           <div className="flex items-center space-x-2 ml-4">
                             <select
                               value={task.status}
@@ -326,18 +343,18 @@ const TaskManager = () => {
                               <option value="in_progress">In Progress</option>
                               <option value="completed">Completed</option>
                             </select>
-                            {(user?.role === 'super_admin' || user?.role === 'admin') && (
-                              <button
-                                onClick={() => handleDeleteTask(task._id)}
-                                className="text-red-600 hover:text-red-800 p-2"
-                                title="Delete task"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            )}
                           </div>
+                        )}
+                        {(user?.role === 'super_admin' || task.createdBy?._id === user?._id) && (
+                          <button
+                            onClick={() => handleDeleteTask(task._id)}
+                            className="text-red-600 hover:text-red-800 p-2 ml-2"
+                            title="Delete task"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         )}
                       </div>
                     </div>

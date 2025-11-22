@@ -47,7 +47,11 @@ export const authAPI = {
   getCurrentUser: () => api.get('/auth/me'),
   getAllUsers: () => api.get('/auth/users'),
   updateProfile: (data) => api.put('/auth/profile', data),
-  changePassword: (data) => api.put('/auth/change-password', data)
+  changePassword: (data) => api.put('/auth/change-password', data),
+  createStaffUser: (data) => api.post('/auth/create-staff', data),
+  updateUser: (id, data) => api.put(`/auth/users/${id}`, data),
+  deleteUser: (id) => api.delete(`/auth/users/${id}`),
+  toggleUserStatus: (id, isActive) => api.patch(`/auth/users/${id}/status`, { isActive })
 };
 
 // Property APIs
@@ -104,6 +108,16 @@ export const dashboardAPI = {
   getSuperAdminStats: () => api.get('/dashboard/super-admin/stats'),
   getAdminStats: () => api.get('/dashboard/admin/stats'),
   getAgentStats: () => api.get('/dashboard/agent/stats')
+};
+
+// Notification APIs
+export const notificationAPI = {
+  getAll: (params) => api.get('/notifications', { params }),
+  getUnreadCount: () => api.get('/notifications/unread/count'),
+  markAsRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllAsRead: () => api.patch('/notifications/read-all'),
+  delete: (id) => api.delete(`/notifications/${id}`),
+  clearRead: () => api.delete('/notifications/clear-read')
 };
 
 export default api;

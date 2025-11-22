@@ -1,6 +1,8 @@
 import { validationResult } from 'express-validator';
 import Property from '../models/Property.model.js';
 import Agent from '../models/Agent.model.js';
+import User from '../models/User.model.js';
+import { notifyPropertyAdded, notifyPropertySold, notifyPropertyAssigned } from '../utils/notificationService.js';
 
 // @desc    Create new property
 // @route   POST /api/properties
@@ -19,6 +21,26 @@ export const createProperty = async (req, res) => {
       ...req.body,
       uploadedBy: req.user._id
     });
+
+    // Notify admins about new property
+    try {
+      const admins = await User.find({
+        role: { $in: ['admin', 'super_admin'] },
+        isActive: true
+      }).select('_id');
+      
+      if (admins.length > 0) {
+        const adminIds = admins.map(admin => admin._id);
+        await notifyPropertyAdded(property, adminIds);
+      }
+      
+      // Notify agent if property is assigned during creation
+      if (req.body.assignedAgent) {
+        await notifyPropertyAssigned(property, req.body.assignedAgent);
+      }
+    } catch (notifError) {
+      console.error('Notification error:', notifError);
+    }
 
     res.status(201).json({
       success: true,
@@ -144,11 +166,37 @@ export const updateProperty = async (req, res) => {
       });
     }
 
+    // Track if property status changed to sold
+    const oldStatus = property.status;
+    const newStatus = req.body.status;
+    
+    // Track if property is being assigned to an agent
+    const oldAssignedAgent = property.assignedAgent?.toString();
+    const newAssignedAgent = req.body.assignedAgent;
+
     const updatedProperty = await Property.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
+
+    // Notify admins when property is sold
+    if (oldStatus !== 'sold' && newStatus === 'sold') {
+      try {
+        await notifyPropertySold(updatedProperty);
+      } catch (notifError) {
+        console.error('Notification error:', notifError);
+      }
+    }
+
+    // Notify agent when property is assigned to them
+    if (newAssignedAgent && newAssignedAgent !== oldAssignedAgent) {
+      try {
+        await notifyPropertyAssigned(updatedProperty, newAssignedAgent);
+      } catch (notifError) {
+        console.error('Notification error:', notifError);
+      }
+    }
 
     res.json({
       success: true,

@@ -12,7 +12,12 @@ const app = express();
 // CORS configuration with flexible origin handling
 const allowedOrigins = process.env.CLIENT_URL 
   ? process.env.CLIENT_URL.split(',').map(url => url.trim())
-  : ['http://localhost:5173', 'http://localhost:5174'];
+  : [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'https://sintecproperty.web.app',
+      'https://sintecproperty.firebaseapp.com'
+    ];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -161,6 +166,7 @@ import customerRoutes from './routes/customer.routes.js';
 import taskRoutes from './routes/task.routes.js';
 import agentRoutes from './routes/agent.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -169,6 +175,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -9,7 +9,11 @@ import Register from './pages/Register';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import PropertyManagement from './pages/PropertyManagement';
+import CustomerManagement from './pages/CustomerManagement';
+import UserManagement from './pages/UserManagement';
+import AgentManagement from './pages/AgentManagement';
 import TaskManager from './pages/TaskManager';
+import NotificationsPage from './pages/NotificationsPage';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -118,7 +122,7 @@ function App() {
         path="/dashboard/customers" 
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
-            <AdminDashboard />
+            <CustomerManagement />
           </ProtectedRoute>
         } 
       />
@@ -126,7 +130,7 @@ function App() {
         path="/dashboard/my-customers" 
         element={
           <ProtectedRoute allowedRoles={['agent']}>
-            <AdminDashboard />
+            <CustomerManagement />
           </ProtectedRoute>
         } 
       />
@@ -135,8 +139,28 @@ function App() {
       <Route 
         path="/dashboard/agents" 
         element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <AgentManagement />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* User Management Routes */}
+      <Route 
+        path="/dashboard/users" 
+        element={
           <ProtectedRoute allowedRoles={['super_admin']}>
-            <AdminDashboard />
+            <UserManagement />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Notifications Route */}
+      <Route 
+        path="/dashboard/notifications" 
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'agent']}>
+            <NotificationsPage />
           </ProtectedRoute>
         } 
       />

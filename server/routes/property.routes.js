@@ -18,10 +18,10 @@ const router = express.Router();
 router.get('/', getAllProperties);
 router.get('/:id', getPropertyById);
 
-// Agent and above routes
+// Agent and above routes (view only for agents)
 router.get('/my/properties', authenticate, agentAndAbove, getMyProperties);
 
-// Admin and above routes
+// Admin and above routes (create, update, delete)
 router.post('/', authenticate, adminOnly, [
   body('name').trim().notEmpty().withMessage('Property name is required'),
   body('description').optional().trim(),

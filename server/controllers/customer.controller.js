@@ -1,6 +1,11 @@
 import { validationResult } from 'express-validator';
 import Customer from '../models/Customer.model.js';
 import Agent from '../models/Agent.model.js';
+import {
+  notifyHighValueLead,
+  notifyCustomerAssigned,
+  notifyDealClosed
+} from '../utils/notificationService.js';
 
 // @desc    Create new customer
 // @route   POST /api/customers
@@ -19,6 +24,18 @@ export const createCustomer = async (req, res) => {
       ...req.body,
       addedBy: req.user._id
     });
+
+    // Notify about high-value leads (budget >= $500,000)
+    try {
+      if (customer.budget && customer.budget >= 500000) {
+        await notifyHighValueLead(customer, customer.assignedAgent);
+      } else if (customer.assignedAgent) {
+        // Notify agent about regular customer assignment
+        await notifyCustomerAssigned(customer, customer.assignedAgent);
+      }
+    } catch (notifError) {
+      console.error('Notification error:', notifError);
+    }
 
     res.status(201).json({
       success: true,
@@ -150,11 +167,34 @@ export const updateCustomer = async (req, res) => {
       });
     }
 
+    // Track if lead status changed to closed/won
+    const oldStatus = customer.leadStatus;
+    const newStatus = req.body.leadStatus;
+
     const updatedCustomer = await Customer.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
-    );
+    ).populate('assignedAgent', 'name email');
+
+    // Notify about deal closure
+    if (oldStatus !== 'closed_won' && newStatus === 'closed_won') {
+      try {
+        const dealAmount = req.body.dealAmount || customer.budget || 0;
+        await notifyDealClosed(updatedCustomer, customer.assignedAgent, dealAmount);
+      } catch (notifError) {
+        console.error('Notification error:', notifError);
+      }
+    }
+
+    // Notify about new customer assignment
+    if (req.body.assignedAgent && req.body.assignedAgent !== customer.assignedAgent?.toString()) {
+      try {
+        await notifyCustomerAssigned(updatedCustomer, req.body.assignedAgent);
+      } catch (notifError) {
+        console.error('Notification error:', notifError);
+      }
+    }
 
     res.json({
       success: true,
@@ -237,6 +277,18 @@ export const assignAgent = async (req, res) => {
     if (!agent.assignedCustomers.includes(customer._id)) {
       agent.assignedCustomers.push(customer._id);
       await agent.save();
+    }
+
+    // Notify agent about new customer assignment
+    try {
+      await notifyCustomerAssigned(customer, agentId);
+      
+      // Also notify if it's a high-value lead
+      if (customer.budget && customer.budget >= 500000) {
+        await notifyHighValueLead(customer, agentId);
+      }
+    } catch (notifError) {
+      console.error('Notification error:', notifError);
     }
 
     res.json({

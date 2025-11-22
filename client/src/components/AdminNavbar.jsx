@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 
 const AdminNavbar = () => {
   const { user, logout } = useAuth();
@@ -76,6 +77,12 @@ const AdminNavbar = () => {
                 >
                   Agents
                 </Link>
+                <Link 
+                  to="/dashboard/users" 
+                  className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                >
+                  Users
+                </Link>
               </>
             )}
 
@@ -105,6 +112,12 @@ const AdminNavbar = () => {
                   className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
                 >
                   Tasks
+                </Link>
+                <Link 
+                  to="/dashboard/agents" 
+                  className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                >
+                  Agents
                 </Link>
               </>
             )}
@@ -138,6 +151,9 @@ const AdminNavbar = () => {
                 </Link>
               </>
             )}
+
+            {/* Notification Bell */}
+            <NotificationBell />
 
             {/* User Profile Dropdown */}
             <div className="relative">
@@ -246,6 +262,7 @@ const AdminNavbar = () => {
                 <Link to="/dashboard/customers" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Customers</Link>
                 <Link to="/dashboard/tasks" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Tasks</Link>
                 <Link to="/dashboard/agents" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Agents</Link>
+                <Link to="/dashboard/users" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Users</Link>
               </>
             )}
 
@@ -255,6 +272,7 @@ const AdminNavbar = () => {
                 <Link to="/dashboard/properties" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Properties</Link>
                 <Link to="/dashboard/customers" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Customers</Link>
                 <Link to="/dashboard/tasks" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Tasks</Link>
+                <Link to="/dashboard/agents" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onClick={() => setShowMobileMenu(false)}>Agents</Link>
               </>
             )}
 
