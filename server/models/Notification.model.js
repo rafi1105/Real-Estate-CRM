@@ -17,6 +17,9 @@ const notificationSchema = new mongoose.Schema({
       'property_assigned',
       'property_sold',
       'customer_assigned',
+      'customer_added',
+      'customer_message',
+      'agent_added',
       'high_value_lead',
       'deal_closed',
       'urgent_task'

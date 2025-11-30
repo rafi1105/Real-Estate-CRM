@@ -29,31 +29,10 @@ function App() {
       <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <Register />} />
       <Route path="/admin-login" element={isAuthenticated ? <Navigate to="/" /> : <AdminLogin />} />
 
-      {/* Protected routes - require authentication */}
-      <Route 
-        path="/property" 
-        element={
-          <ProtectedRoute>
-            <Property />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/about" 
-        element={
-          <ProtectedRoute>
-            <About />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/contact" 
-        element={
-          <ProtectedRoute>
-            <Contact />
-          </ProtectedRoute>
-        } 
-      />
+      {/* Public routes - accessible without authentication */}
+      <Route path="/property" element={<Property />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
 
       {/* Dashboard routes */}
       <Route 
@@ -85,7 +64,7 @@ function App() {
       <Route 
         path="/dashboard/properties" 
         element={
-          <ProtectedRoute allowedRoles={['super_admin']}>
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
             <PropertyManagement />
           </ProtectedRoute>
         } 
@@ -121,7 +100,7 @@ function App() {
       <Route 
         path="/dashboard/customers" 
         element={
-          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'agent']}>
             <CustomerManagement />
           </ProtectedRoute>
         } 

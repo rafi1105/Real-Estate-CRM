@@ -1,9 +1,12 @@
 import { validationResult } from 'express-validator';
 import Customer from '../models/Customer.model.js';
 import Agent from '../models/Agent.model.js';
+import User from '../models/User.model.js';
 import {
   notifyHighValueLead,
   notifyCustomerAssigned,
+  notifyCustomerAdded,
+  notifyCustomerMessage,
   notifyDealClosed
 } from '../utils/notificationService.js';
 
@@ -25,13 +28,22 @@ export const createCustomer = async (req, res) => {
       addedBy: req.user._id
     });
 
-    // Notify about high-value leads (budget >= $500,000)
+    // Notification logic based on role and assignment
     try {
-      if (customer.budget && customer.budget >= 500000) {
-        await notifyHighValueLead(customer, customer.assignedAgent);
-      } else if (customer.assignedAgent) {
-        // Notify agent about regular customer assignment
+      // If agent adds customer without assignment, notify admins
+      if (req.user.role === 'agent' && !customer.assignedAgent) {
+        await notifyCustomerAdded(customer, req.user._id);
+      }
+      
+      // If customer has assigned agent
+      if (customer.assignedAgent) {
+        // Notify agent about assignment
         await notifyCustomerAssigned(customer, customer.assignedAgent);
+        
+        // High-value lead notification
+        if (customer.budget && customer.budget >= 500000) {
+          await notifyHighValueLead(customer, customer.assignedAgent);
+        }
       }
     } catch (notifError) {
       console.error('Notification error:', notifError);
@@ -334,6 +346,35 @@ export const addNote = async (req, res) => {
     });
 
     await customer.save();
+    
+    // Populate the customer to get full details
+    await customer.populate('assignedAgent addedBy');
+
+    // Notify relevant users about the new message
+    try {
+      const recipientIds = [];
+      
+      // Notify assigned agent if exists and not the sender
+      if (customer.assignedAgent && customer.assignedAgent._id.toString() !== req.user._id.toString()) {
+        recipientIds.push(customer.assignedAgent._id);
+      }
+      
+      // Notify all admins and super admins (except sender)
+      const admins = await User.find({
+        role: { $in: ['admin', 'super_admin'] },
+        isActive: true,
+        _id: { $ne: req.user._id }
+      }).select('_id');
+      
+      admins.forEach(admin => recipientIds.push(admin._id));
+      
+      // Send notifications if there are recipients
+      if (recipientIds.length > 0) {
+        await notifyCustomerMessage(customer, note, req.user.name, recipientIds);
+      }
+    } catch (notifError) {
+      console.error('Notification error:', notifError);
+    }
 
     res.json({
       success: true,

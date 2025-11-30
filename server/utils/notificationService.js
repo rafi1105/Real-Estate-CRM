@@ -160,7 +160,7 @@ export const notifyPropertyAdded = async (property, adminIds) => {
   return await createBulkNotifications(adminIds, {
     type: 'property_added',
     title: 'New Property Listed',
-    message: `New property added: ${property.name} - $${property.price?.toLocaleString()}`,
+    message: `New property added: ${property.name} - ৳${property.price?.toLocaleString()}`,
     priority: 'medium',
     relatedEntity: {
       entityType: 'Property',
@@ -179,7 +179,7 @@ export const notifyPropertySold = async (property) => {
   return await notifyAdmins({
     type: 'property_sold',
     title: '🎉 Property Sold',
-    message: `Property sold: ${property.name} - $${property.price?.toLocaleString()}`,
+    message: `Property sold: ${property.name} - ৳${property.price?.toLocaleString()}`,
     priority: 'high',
     relatedEntity: {
       entityType: 'Property',
@@ -203,7 +203,7 @@ export const notifyHighValueLead = async (customer, agentId) => {
       notifyUser(agentId, {
         type: 'high_value_lead',
         title: '💎 High Value Lead',
-        message: `New high-value lead: ${customer.name} (Budget: $${customer.budget?.toLocaleString()})`,
+        message: `New high-value lead: ${customer.name} (Budget: ৳${customer.budget?.toLocaleString()})`,
         priority: 'high',
         relatedEntity: {
           entityType: 'Customer',
@@ -251,7 +251,7 @@ export const notifyDealClosed = async (customer, agentId, dealAmount) => {
       notifyUser(agentId, {
         type: 'deal_closed',
         title: '🎉 Deal Closed!',
-        message: `Congratulations! Deal closed with ${customer.name} - $${dealAmount?.toLocaleString()}`,
+        message: `Congratulations! Deal closed with ${customer.name} - ৳${dealAmount?.toLocaleString()}`,
         priority: 'high',
         relatedEntity: {
           entityType: 'Customer',
@@ -272,7 +272,7 @@ export const notifyDealClosed = async (customer, agentId, dealAmount) => {
     notifyAdmins({
       type: 'deal_closed',
       title: '🎉 Deal Closed',
-      message: `Deal closed: ${customer.name} - $${dealAmount?.toLocaleString()}`,
+      message: `Deal closed: ${customer.name} - ৳${dealAmount?.toLocaleString()}`,
       priority: 'high',
       relatedEntity: {
         entityType: 'Customer',
@@ -313,7 +313,7 @@ export const notifyPropertyAssigned = async (property, agentId) => {
   return await notifyUser(agentId, {
     type: 'property_assigned',
     title: 'New Property Assigned',
-    message: `You have been assigned a new property: ${property.name} - $${property.price?.toLocaleString()}`,
+    message: `You have been assigned a new property: ${property.name} - ৳${property.price?.toLocaleString()}`,
     priority: 'medium',
     relatedEntity: {
       entityType: 'Property',
@@ -328,3 +328,76 @@ export const notifyPropertyAssigned = async (property, agentId) => {
     }
   });
 };
+
+// Notify admins when agent adds customer without assignment
+export const notifyCustomerAdded = async (customer, addedByUserId) => {
+  return await notifyAdmins({
+    type: 'customer_added',
+    title: 'New Customer Added',
+    message: `New customer added by agent: ${customer.name}${customer.budget ? ` (Budget: ৳${customer.budget?.toLocaleString()})` : ''}`,
+    priority: 'medium',
+    relatedEntity: {
+      entityType: 'Customer',
+      entityId: customer._id
+    },
+    actionUrl: `/dashboard/customers/${customer._id}`,
+    metadata: {
+      customerName: customer.name,
+      addedBy: addedByUserId,
+      leadStatus: customer.leadStatus,
+      budget: customer.budget
+    }
+  });
+};
+
+// Notify about customer communication log messages
+export const notifyCustomerMessage = async (customer, messageText, senderName, recipientIds) => {
+  const notifications = recipientIds.map(recipientId => 
+    notifyUser(recipientId, {
+      type: 'customer_message',
+      title: 'New Communication Log Message',
+      message: `${senderName} added a message for ${customer.name}: "${messageText.substring(0, 50)}${messageText.length > 50 ? '...' : ''}"`,
+      priority: 'medium',
+      relatedEntity: {
+        entityType: 'Customer',
+        entityId: customer._id
+      },
+      actionUrl: `/dashboard/customers/${customer._id}`,
+      metadata: {
+        customerName: customer.name,
+        senderName: senderName,
+        messagePreview: messageText.substring(0, 100)
+      }
+    })
+  );
+  
+  return await Promise.all(notifications);
+};
+
+// Notify super admin when new agent is added
+export const notifyAgentAdded = async (agent, userId) => {
+  const superAdmins = await User.find({
+    role: 'super_admin',
+    isActive: true
+  }).select('_id');
+  
+  const superAdminIds = superAdmins.map(admin => admin._id);
+  
+  return await createBulkNotifications(superAdminIds, {
+    type: 'agent_added',
+    title: 'New Agent Added',
+    message: `New agent profile created for ${agent.userId?.name || 'user'}`,
+    priority: 'medium',
+    relatedEntity: {
+      entityType: 'Agent',
+      entityId: agent._id
+    },
+    actionUrl: `/dashboard/agents`,
+    metadata: {
+      agentId: agent._id,
+      userId: userId,
+      specialization: agent.specialization
+    }
+  });
+};
+

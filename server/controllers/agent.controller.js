@@ -1,6 +1,7 @@
 import { validationResult } from 'express-validator';
 import Agent from '../models/Agent.model.js';
 import User from '../models/User.model.js';
+import { notifyAgentAdded } from '../utils/notificationService.js';
 
 // @desc    Create new agent
 // @route   POST /api/agents
@@ -48,6 +49,13 @@ export const createAgent = async (req, res) => {
     });
 
     await agent.populate('userId managedBy', 'name email');
+
+    // Notify super admins about new agent
+    try {
+      await notifyAgentAdded(agent, userId);
+    } catch (notifError) {
+      console.error('Notification error:', notifError);
+    }
 
     res.status(201).json({
       success: true,

@@ -22,16 +22,16 @@ export const createProperty = async (req, res) => {
       uploadedBy: req.user._id
     });
 
-    // Notify admins about new property
+    // Notify all users (admin, super_admin, and agents) about new property
     try {
-      const admins = await User.find({
-        role: { $in: ['admin', 'super_admin'] },
+      const allUsers = await User.find({
+        role: { $in: ['admin', 'super_admin', 'agent'] },
         isActive: true
       }).select('_id');
       
-      if (admins.length > 0) {
-        const adminIds = admins.map(admin => admin._id);
-        await notifyPropertyAdded(property, adminIds);
+      if (allUsers.length > 0) {
+        const userIds = allUsers.map(u => u._id);
+        await notifyPropertyAdded(property, userIds);
       }
       
       // Notify agent if property is assigned during creation

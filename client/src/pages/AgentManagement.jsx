@@ -45,11 +45,18 @@ const AgentManagement = () => {
   const fetchUsers = async () => {
     try {
       const response = await authAPI.getAllUsers();
+      console.log('All users:', response.data.users); // Debug log
       // Filter to show only users with agent role who don't have agent profile yet
-      const agentUsers = (response.data.users || []).filter(u => u.role === 'agent');
+      const allUsers = response.data.users || [];
+      const existingAgentUserIds = agents.map(a => a.userId?._id || a.userId);
+      const agentUsers = allUsers.filter(u => 
+        u.role === 'agent' && !existingAgentUserIds.includes(u._id)
+      );
+      console.log('Filtered agent users:', agentUsers); // Debug log
       setUsers(agentUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
     }
   };
 
