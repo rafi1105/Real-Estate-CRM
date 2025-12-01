@@ -56,7 +56,7 @@ const customerSchema = new mongoose.Schema({
   // Status tracking
   status: {
     type: String,
-    enum: ['new', 'contacted', 'interested', 'negotiating', 'closed', 'lost'],
+    enum: ['new', 'contacted', 'interested', 'negotiating', 'closed', 'lost', 'need flat'],
     default: 'new'
   },
   priority: {

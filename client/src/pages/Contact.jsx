@@ -90,8 +90,9 @@ const Contact = () => {
                       Our Office
                     </h3>
                     <p className="text-gray-600">
-                      123 Main Street, Gulshan-2<br />
-                      Dhaka 1212, Bangladesh
+                      Dhaka Shopping Tower, 3rd Floor<br />
+                      852 Zia Sarani, Shonir Akhra<br />
+                      Dhaka 1236, Bangladesh
                     </p>
                   </div>
                 </div>
@@ -118,8 +119,8 @@ const Contact = () => {
                       Call Us
                     </h3>
                     <p className="text-gray-600">
-                      +880 1234-567890<br />
-                      +880 9876-543210
+                      01840-109494<br />
+                      01757-812956
                     </p>
                   </div>
                 </div>
@@ -146,8 +147,8 @@ const Contact = () => {
                       Email Us
                     </h3>
                     <p className="text-gray-600">
-                      info@sintecproperties.com<br />
-                      support@sintecproperties.com
+                      Info@sintecproperty.com<br />
+                      sales@sintecproperty.com
                     </p>
                   </div>
                 </div>
@@ -174,8 +175,8 @@ const Contact = () => {
                       Working Hours
                     </h3>
                     <p className="text-gray-600">
-                      Saturday - Thursday: 9:00 AM - 6:00 PM<br />
-                      Friday: Closed
+                      Monday - Saturday: 9:00 AM - 8:00 PM<br />
+                      Sunday: Closed
                     </p>
                   </div>
                 </div>
@@ -308,35 +309,17 @@ const Contact = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
               Our Location
             </h2>
-            <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-96">
-              {/* Placeholder for Google Maps or other map service */}
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center">
-                  <svg
-                    className="w-16 h-16 text-gray-400 mx-auto mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <p className="text-gray-600">Map integration placeholder</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    123 Main Street, Gulshan-2, Dhaka 1212
-                  </p>
-                </div>
-              </div>
+            <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src="/location.png" 
+                alt="Dhaka Shopping Tower Location - 852 Zia Sarani, Shonir Akhra, Dhaka 1236" 
+                className="w-full h-auto object-cover"
+              />
+            </div>
+            <div className="text-center mt-4">
+              <p className="text-gray-700 font-medium">
+                Dhaka Shopping Tower, 3rd Floor, 852 Zia Sarani, Shonir Akhra, Dhaka 1236
+              </p>
             </div>
           </div>
         </div>

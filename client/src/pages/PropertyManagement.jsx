@@ -307,7 +307,7 @@ const PropertyManagement = () => {
               )}
               {minPrice && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">
-                  Min: ${Number(minPrice).toLocaleString()}
+                  Min: ৳{Number(minPrice).toLocaleString()}
                   <button onClick={() => setMinPrice('')} className="hover:text-orange-900">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -317,7 +317,7 @@ const PropertyManagement = () => {
               )}
               {maxPrice && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-                  Max: ${Number(maxPrice).toLocaleString()}
+                  Max: ৳{Number(maxPrice).toLocaleString()}
                   <button onClick={() => setMaxPrice('')} className="hover:text-red-900">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -383,7 +383,7 @@ const PropertyManagement = () => {
                         <div className="text-sm text-gray-500">{property.bedrooms} bed • {property.bathrooms} bath</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{property.location}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${property.price?.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">৳{property.price?.toLocaleString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{property.type}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -460,7 +460,7 @@ const PropertyManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price (৳)</label>
                   <input
                     type="number"
                     name="price"

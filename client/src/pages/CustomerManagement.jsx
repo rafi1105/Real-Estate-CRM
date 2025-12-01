@@ -232,7 +232,8 @@ const CustomerManagement = () => {
       interested: 'bg-purple-100 text-purple-800',
       negotiating: 'bg-orange-100 text-orange-800',
       closed: 'bg-green-100 text-green-800',
-      lost: 'bg-red-100 text-red-800'
+      lost: 'bg-red-100 text-red-800',
+      'need flat': 'bg-indigo-100 text-indigo-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -338,6 +339,7 @@ const CustomerManagement = () => {
                 <option value="negotiating">Negotiating</option>
                 <option value="closed">Closed</option>
                 <option value="lost">Lost</option>
+                <option value="need flat">Need Flat</option>
               </select>
             </div>
 
@@ -482,7 +484,7 @@ const CustomerManagement = () => {
                         <div className="text-sm text-gray-500">{customer.phone}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${customer.budget?.min?.toLocaleString()} - ${customer.budget?.max?.toLocaleString()}
+                        ৳{customer.budget?.min?.toLocaleString()} - ৳{customer.budget?.max?.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(customer.status)}`}>
@@ -597,6 +599,7 @@ const CustomerManagement = () => {
                     <option value="negotiating">Negotiating</option>
                     <option value="closed">Closed</option>
                     <option value="lost">Lost</option>
+                    <option value="need flat">Need Flat</option>
                   </select>
                 </div>
 
@@ -729,7 +732,7 @@ const CustomerManagement = () => {
                         <div className="flex-1">
                           <div className="font-medium text-gray-900">{property.name}</div>
                           <div className="text-sm text-gray-600">
-                            ${property.price?.toLocaleString()} • {property.location}
+                            ৳{property.price?.toLocaleString()} • {property.location}
                           </div>
                           <div className="text-xs text-gray-500">
                             {property.bedrooms} bed • {property.bathrooms} bath • {property.squareFeet} sqft
@@ -852,7 +855,7 @@ const CustomerManagement = () => {
                   <div>
                     <span className="text-sm font-medium text-gray-500">Budget Range:</span>
                     <p className="text-gray-900">
-                      ${selectedCustomer.budget?.min?.toLocaleString()} - ${selectedCustomer.budget?.max?.toLocaleString()}
+                      ৳{selectedCustomer.budget?.min?.toLocaleString()} - ৳{selectedCustomer.budget?.max?.toLocaleString()}
                     </p>
                   </div>
                   <div>
@@ -886,7 +889,7 @@ const CustomerManagement = () => {
                           <p className="text-sm text-gray-600">{property.location}</p>
                         </div>
                         <p className="text-lg font-semibold text-blue-600">
-                          ${property.price?.toLocaleString()}
+                          ৳{property.price?.toLocaleString()}
                         </p>
                       </div>
                     ))}
@@ -908,8 +911,9 @@ const CustomerManagement = () => {
                 {/* Add Note Input - Moved to top for better UX */}
                 <div className="mb-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      📝 Add New Communication Entry
+                    <label className="flex justify-between items-center text-sm font-medium text-gray-700 mb-2">
+                      <span>📝 Add New Communication Entry</span>
+                      <span className="text-xs text-gray-500 font-normal">Posting as: <span className="font-medium text-blue-600">{user?.name}</span></span>
                     </label>
                     <textarea
                       value={noteText}
@@ -959,6 +963,18 @@ const CustomerManagement = () => {
                           if (isToday) dateLabel = 'Today';
                           else if (isYesterday) dateLabel = 'Yesterday';
 
+                          const getAuthorName = (note) => {
+                            if (note.addedBy?.name) return note.addedBy.name;
+                            if (note.addedBy === user?._id || note.addedBy?._id === user?._id) return user?.name;
+                            if (typeof note.addedBy === 'string') {
+                                const agent = agents.find(a => a._id === note.addedBy);
+                                if (agent) return agent.name;
+                            }
+                            return 'Admin';
+                          };
+
+                          const authorName = getAuthorName(note);
+
                           return (
                             <div key={index} className="relative">
                               {/* Timeline line */}
@@ -970,7 +986,7 @@ const CustomerManagement = () => {
                               <div className="flex gap-3">
                                 {/* Avatar/Icon */}
                                 <div className="shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm z-10">
-                                  {note.addedBy?.name?.charAt(0).toUpperCase() || '?'}
+                                  {authorName.charAt(0).toUpperCase()}
                                 </div>
                                 
                                 {/* Content */}
@@ -980,7 +996,7 @@ const CustomerManagement = () => {
                                     <div className="flex justify-between items-start mb-2">
                                       <div>
                                         <p className="text-sm font-semibold text-gray-900">
-                                          {note.addedBy?.name || 'Unknown User'}
+                                          {authorName}
                                         </p>
                                         <div className="flex items-center gap-2 text-xs text-gray-500">
                                           <span>{dateLabel}</span>

@@ -537,11 +537,11 @@ const AgentManagement = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Total Sales</p>
-                    <p className="text-2xl font-bold text-blue-600">${selectedAgent.totalSales?.toLocaleString() || 0}</p>
+                    <p className="text-2xl font-bold text-blue-600">৳{selectedAgent.totalSales?.toLocaleString() || 0}</p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Commission</p>
-                    <p className="text-2xl font-bold text-green-600">${selectedAgent.totalCommission?.toLocaleString() || 0}</p>
+                    <p className="text-2xl font-bold text-green-600">৳{selectedAgent.totalCommission?.toLocaleString() || 0}</p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Closed Deals</p>

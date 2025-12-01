@@ -91,6 +91,7 @@ export const getAllCustomers = async (req, res) => {
       .populate('addedBy', 'name email')
       .populate('assignedAgent', 'name email')
       .populate('interestedProperties', 'name price location')
+      .populate('notes.addedBy', 'name')
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit)
@@ -348,7 +349,11 @@ export const addNote = async (req, res) => {
     await customer.save();
     
     // Populate the customer to get full details
-    await customer.populate('assignedAgent addedBy');
+    await customer.populate([
+      { path: 'assignedAgent', select: 'name email' },
+      { path: 'addedBy', select: 'name email' },
+      { path: 'notes.addedBy', select: 'name' }
+    ]);
 
     // Notify relevant users about the new message
     try {
@@ -408,6 +413,7 @@ export const getMyCustomers = async (req, res) => {
         .populate('addedBy', 'name email')
         .populate('assignedAgent', 'name email')
         .populate('interestedProperties', 'name price location')
+        .populate('notes.addedBy', 'name')
         .sort('-createdAt');
     } else {
       // Admin/Super Admin see all customers
@@ -415,6 +421,7 @@ export const getMyCustomers = async (req, res) => {
         .populate('addedBy', 'name email')
         .populate('assignedAgent', 'name email')
         .populate('interestedProperties', 'name price location')
+        .populate('notes.addedBy', 'name')
         .sort('-createdAt');
     }
 
