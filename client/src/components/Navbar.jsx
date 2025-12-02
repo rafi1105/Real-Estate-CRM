@@ -61,8 +61,8 @@ const Navbar = () => {
                 to={link.path}
                 className={`px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                   isActive(link.path)
-                    ? 'bg-[var(--color-primary)] text-white shadow-md'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-gray-100)]'
+                    ? 'bg-(--color-primary) text-white shadow-md'
+                    : 'text-(--text-secondary) hover:text-(--color-primary) hover:bg-(--color-gray-100)'
                 }`}
               >
                 {link.label}
@@ -74,7 +74,7 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center space-x-4">
             <a
               href="tel:+8801234567890"
-              className="flex items-center space-x-2 text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-colors duration-300"
+              className="flex items-center space-x-2 text-(--text-secondary) hover:text-(--color-primary) transition-colors duration-300"
             >
               <svg
                 className="w-5 h-5"
@@ -143,7 +143,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:bg-opacity-90 transition-all"
+                  className="px-4 py-2 bg-(--color-primary) text-white rounded-lg font-medium hover:bg-opacity-90 transition-all"
                 >
                   Register
                 </Link>
@@ -154,7 +154,7 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--color-gray-100)] transition-colors duration-300"
+            className="md:hidden p-2 rounded-lg text-(--text-secondary) hover:bg-(--color-gray-100) transition-colors duration-300"
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? (
@@ -200,8 +200,8 @@ const Navbar = () => {
                   onClick={closeMobileMenu}
                   className={`px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
                     isActive(link.path)
-                      ? 'bg-[var(--color-primary)] text-white shadow-md'
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--color-gray-100)]'
+                      ? 'bg-(--color-primary) text-white shadow-md'
+                      : 'text-(--text-secondary) hover:bg-(--color-gray-100)'
                   }`}
                 >
                   {link.label}
@@ -252,7 +252,7 @@ const Navbar = () => {
                   <Link
                     to="/register"
                     onClick={closeMobileMenu}
-                    className="px-4 py-3 bg-[var(--color-primary)] text-white rounded-lg font-medium text-center hover:bg-opacity-90 transition-all"
+                    className="px-4 py-3 bg-(--color-primary) text-white rounded-lg font-medium text-center hover:bg-opacity-90 transition-all"
                   >
                     Register
                   </Link>
@@ -260,10 +260,10 @@ const Navbar = () => {
               )}
               
               {/* Mobile Contact Info */}
-              <div className="pt-4 border-t border-[var(--border-light)]">
+              <div className="pt-4 border-t border-(--border-light)">
                 <a
                   href="tel:+8801234567890"
-                  className="flex items-center space-x-2 px-4 py-3 text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-colors duration-300"
+                  className="flex items-center space-x-2 px-4 py-3 text-(--text-secondary) hover:text-(--color-primary) transition-colors duration-300"
                 >
                   <svg
                     className="w-5 h-5"

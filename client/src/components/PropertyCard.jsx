@@ -1,3 +1,5 @@
+import { Link } from 'react-router';
+
 const PropertyCard = ({ property }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-BD', {
@@ -166,12 +168,15 @@ const PropertyCard = ({ property }) => {
               {formatPrice(property.price)}
             </p>
           </div>
-          <button className="bg-blue-600 text-white px-4 sm:px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium text-sm sm:text-base flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <Link 
+            to={`/property/${property._id}`}
+            className="bg-blue-600 text-white px-4 sm:px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium text-sm sm:text-base flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
             <span>Details</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </Link>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router';
 import { useAuth } from './context/AuthContext';
 import Home from './pages/Home';
 import Property from './pages/Property';
+import PropertyDetails from './pages/PropertyDetails';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
@@ -31,6 +32,7 @@ function App() {
 
       {/* Public routes - accessible without authentication */}
       <Route path="/property" element={<Property />} />
+      <Route path="/property/:id" element={<PropertyDetails />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
 

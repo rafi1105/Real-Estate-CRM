@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
 import Navbar from '../components/Navbar';
 import HeroBanner from '../components/HeroBanner';
 import PropertyCard from '../components/PropertyCard';
@@ -85,15 +86,15 @@ const Home = () => {
           </div>
 
           <div className="text-center mt-12">
-            <a
-              href="/property"
+            <Link
+              to="/property"
               className="btn btn-primary inline-flex items-center space-x-2"
             >
               <span>View All Properties</span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
