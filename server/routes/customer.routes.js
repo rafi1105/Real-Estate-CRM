@@ -20,8 +20,8 @@ router.get('/my/customers', authenticate, agentAndAbove, getMyCustomers);
 router.get('/:id', authenticate, agentAndAbove, getCustomerById);
 
 router.post('/', authenticate, agentAndAbove, [
-  body('name').trim().notEmpty().withMessage('Customer name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
+  body('name').optional().trim(),
+  body('email').optional().isEmail().withMessage('Valid email is required if provided'),
   body('phone').trim().notEmpty().withMessage('Phone number is required')
 ], createCustomer);
 

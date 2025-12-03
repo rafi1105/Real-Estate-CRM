@@ -3,14 +3,12 @@ import mongoose from 'mongoose';
 const customerSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Customer name is required'],
     trim: true
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
-    lowercase: true,
-    trim: true
+    trim: true,
+    lowercase: true
   },
   phone: {
     type: String,

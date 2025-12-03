@@ -20,6 +20,18 @@ const propertySchema = new mongoose.Schema({
     required: [true, 'Location is required'],
     trim: true
   },
+  zone: {
+    type: String,
+    trim: true
+  },
+  thana: {
+    type: String,
+    trim: true
+  },
+  area: {
+    type: String,
+    trim: true
+  },
   address: {
     type: String,
     trim: true

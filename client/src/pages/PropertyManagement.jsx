@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import AdminNavbar from '../components/AdminNavbar';
 import { propertyAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { locationData } from '../data/locations';
 
 const PropertyManagement = () => {
   const { user } = useAuth();
@@ -15,6 +16,9 @@ const PropertyManagement = () => {
     name: '',
     price: '',
     location: '',
+    zone: '',
+    thana: '',
+    area: '',
     type: 'Apartment',
     bedrooms: '',
     bathrooms: '',
@@ -31,6 +35,9 @@ const PropertyManagement = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [filterZone, setFilterZone] = useState('all');
+  const [filterThana, setFilterThana] = useState('all');
+  const [filterArea, setFilterArea] = useState('all');
 
   useEffect(() => {
     fetchProperties();
@@ -51,10 +58,34 @@ const PropertyManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    if (name === 'zone') {
+      setFormData(prev => ({ 
+        ...prev, 
+        zone: value, 
+        thana: '', 
+        area: '', 
+        location: value 
+      }));
+    } else if (name === 'thana') {
+      setFormData(prev => ({ 
+        ...prev, 
+        thana: value, 
+        area: '', 
+        location: `${value}, ${prev.zone}` 
+      }));
+    } else if (name === 'area') {
+      setFormData(prev => ({ 
+        ...prev, 
+        area: value, 
+        location: `${value}, ${prev.thana}, ${prev.zone}` 
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -94,6 +125,9 @@ const PropertyManagement = () => {
       name: property.name,
       price: property.price,
       location: property.location,
+      zone: property.zone || '',
+      thana: property.thana || '',
+      area: property.area || '',
       type: property.type,
       bedrooms: property.bedrooms,
       bathrooms: property.bathrooms,
@@ -126,6 +160,9 @@ const PropertyManagement = () => {
       name: '',
       price: '',
       location: '',
+      zone: '',
+      thana: '',
+      area: '',
       type: 'Apartment',
       bedrooms: '',
       bathrooms: '',
@@ -161,7 +198,12 @@ const PropertyManagement = () => {
     const matchesMinPrice = !minPrice || property.price >= Number(minPrice);
     const matchesMaxPrice = !maxPrice || property.price <= Number(maxPrice);
 
-    return matchesSearch && matchesType && matchesStatus && matchesMinPrice && matchesMaxPrice;
+    // Location filters
+    const matchesZone = filterZone === 'all' || property.zone === filterZone;
+    const matchesThana = filterThana === 'all' || property.thana === filterThana;
+    const matchesArea = filterArea === 'all' || property.area === filterArea;
+
+    return matchesSearch && matchesType && matchesStatus && matchesMinPrice && matchesMaxPrice && matchesZone && matchesThana && matchesArea;
   });
 
   return (
@@ -271,8 +313,57 @@ const PropertyManagement = () => {
             </div>
           </div>
 
+          {/* Location Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <select
+                value={filterZone}
+                onChange={(e) => {
+                  setFilterZone(e.target.value);
+                  setFilterThana('all');
+                  setFilterArea('all');
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Zones</option>
+                {Object.keys(locationData).map(zone => (
+                  <option key={zone} value={zone}>{zone}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <select
+                value={filterThana}
+                onChange={(e) => {
+                  setFilterThana(e.target.value);
+                  setFilterArea('all');
+                }}
+                disabled={filterZone === 'all'}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              >
+                <option value="all">All Thanas</option>
+                {filterZone !== 'all' && locationData[filterZone] && Object.keys(locationData[filterZone]).map(thana => (
+                  <option key={thana} value={thana}>{thana}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <select
+                value={filterArea}
+                onChange={(e) => setFilterArea(e.target.value)}
+                disabled={filterThana === 'all'}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              >
+                <option value="all">All Areas</option>
+                {filterZone !== 'all' && filterThana !== 'all' && locationData[filterZone][filterThana] && locationData[filterZone][filterThana].map(area => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {/* Active Filters Display */}
-          {(searchTerm || filterType !== 'all' || filterStatus !== 'all' || minPrice || maxPrice) && (
+          {(searchTerm || filterType !== 'all' || filterStatus !== 'all' || minPrice || maxPrice || filterZone !== 'all' || filterThana !== 'all' || filterArea !== 'all') && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <span className="text-sm text-gray-600 font-medium">Active Filters:</span>
               {searchTerm && (
@@ -325,6 +416,43 @@ const PropertyManagement = () => {
                   </button>
                 </span>
               )}
+              {filterZone !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                  Zone: {filterZone}
+                  <button onClick={() => {
+                    setFilterZone('all');
+                    setFilterThana('all');
+                    setFilterArea('all');
+                  }} className="hover:text-indigo-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {filterThana !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                  Thana: {filterThana}
+                  <button onClick={() => {
+                    setFilterThana('all');
+                    setFilterArea('all');
+                  }} className="hover:text-indigo-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {filterArea !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                  Area: {filterArea}
+                  <button onClick={() => setFilterArea('all')} className="hover:text-indigo-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
               <button
                 onClick={() => {
                   setSearchTerm('');
@@ -332,6 +460,9 @@ const PropertyManagement = () => {
                   setFilterStatus('all');
                   setMinPrice('');
                   setMaxPrice('');
+                  setFilterZone('all');
+                  setFilterThana('all');
+                  setFilterArea('all');
                 }}
                 className="text-sm text-red-600 hover:text-red-800 font-medium"
               >
@@ -471,15 +602,61 @@ const PropertyManagement = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Zone</label>
+                    <select
+                      name="zone"
+                      value={formData.zone}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select Zone</option>
+                      {Object.keys(locationData).map(zone => (
+                        <option key={zone} value={zone}>{zone}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Thana</label>
+                    <select
+                      name="thana"
+                      value={formData.thana}
+                      onChange={handleInputChange}
+                      disabled={!formData.zone}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                    >
+                      <option value="">Select Thana</option>
+                      {formData.zone && locationData[formData.zone] && Object.keys(locationData[formData.zone]).map(thana => (
+                        <option key={thana} value={thana}>{thana}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                    <select
+                      name="area"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      disabled={!formData.thana}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                    >
+                      <option value="">Select Area</option>
+                      {formData.zone && formData.thana && locationData[formData.zone][formData.thana] && locationData[formData.zone][formData.thana].map(area => (
+                        <option key={area} value={area}>{area}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Location</label>
                   <input
                     type="text"
                     name="location"
                     value={formData.location}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 

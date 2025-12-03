@@ -149,7 +149,7 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="mt-6">
+          {/* <div className="mt-6">
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
@@ -175,7 +175,7 @@ const Login = () => {
               </svg>
               Sign in with Google
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="text-center">

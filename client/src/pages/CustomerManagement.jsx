@@ -34,6 +34,7 @@ const CustomerManagement = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [filterAgent, setFilterAgent] = useState('all');
+  const [propertySearchTerm, setPropertySearchTerm] = useState('');
 
   useEffect(() => {
     fetchCustomers();
@@ -68,12 +69,15 @@ const CustomerManagement = () => {
   const fetchAgents = async () => {
     try {
       const response = await authAPI.getAllUsers();
+      // Allow assigning to any staff member (agent, admin, or super_admin)
       const agentUsers = (response.data.users || []).filter(
-        u => u.role === 'agent' || u.role === 'admin'
+        u => ['agent', 'admin', 'super_admin'].includes(u.role)
       );
       setAgents(agentUsers);
     } catch (error) {
       console.error('Error fetching agents:', error);
+      // If we can't fetch users (e.g. permission issue), we just won't show the list
+      // But we should try to handle it gracefully
     }
   };
 
@@ -550,37 +554,34 @@ const CustomerManagement = () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -707,9 +708,21 @@ const CustomerManagement = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Interested Properties
                 </label>
+                <input
+                  type="text"
+                  placeholder="Search properties..."
+                  value={propertySearchTerm}
+                  onChange={(e) => setPropertySearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
                 <div className="border border-gray-300 rounded-lg max-h-60 overflow-y-auto bg-white">
                   {properties.length > 0 ? (
-                    properties.map(property => (
+                    properties
+                      .filter(p => 
+                        p.name.toLowerCase().includes(propertySearchTerm.toLowerCase()) || 
+                        p.location.toLowerCase().includes(propertySearchTerm.toLowerCase())
+                      )
+                      .map(property => (
                       <label
                         key={property._id}
                         className="flex items-start p-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0 transition-colors"
@@ -752,7 +765,7 @@ const CustomerManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Assign Agent</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Assign Handler</label>
                 <select
                   name="assignedAgent"
                   value={formData.assignedAgent}
@@ -762,7 +775,7 @@ const CustomerManagement = () => {
                   <option value="">Unassigned</option>
                   {agents.map(agent => (
                     <option key={agent._id} value={agent._id}>
-                      {agent.name} ({agent.email})
+                      {agent.name} ({agent.role})
                     </option>
                   ))}
                 </select>

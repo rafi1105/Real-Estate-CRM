@@ -14,7 +14,7 @@ import {
   deleteUser,
   toggleUserStatus
 } from '../controllers/auth.controller.js';
-import { authenticate, superAdminOnly } from '../middleware/auth.middleware.js';
+import { authenticate, superAdminOnly, agentAndAbove } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
@@ -61,8 +61,8 @@ router.put('/change-password', authenticate, [
   body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters')
 ], changePassword);
 
-// Get all users (Super Admin only)
-router.get('/users', authenticate, superAdminOnly, getAllUsers);
+// Get all users (Accessible by Agents, Admins, and Super Admins for assignment purposes)
+router.get('/users', authenticate, agentAndAbove, getAllUsers);
 
 // Create admin/agent user (Super Admin only)
 router.post('/create-staff', authenticate, superAdminOnly, [

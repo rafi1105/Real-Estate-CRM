@@ -141,12 +141,12 @@ const Navbar = () => {
                 >
                   Login
                 </Link>
-                <Link
-                  to="/register"
-                  className="px-4 py-2 bg-(--color-primary) text-white rounded-lg font-medium hover:bg-opacity-90 transition-all"
+                <a 
+                  href="https://sintecproperty.web.app/admin-login" 
+                  className="px-4 py-2 border border-[--color-primary] text-[--color-primary] rounded-lg hover:bg-blue-50 transition-colors font-medium"
                 >
-                  Register
-                </Link>
+                  Admin Login
+                </a>
               </div>
             )}
           </div>
@@ -248,13 +248,6 @@ const Navbar = () => {
                     className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium text-center hover:bg-gray-50 transition-colors"
                   >
                     Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={closeMobileMenu}
-                    className="px-4 py-3 bg-(--color-primary) text-white rounded-lg font-medium text-center hover:bg-opacity-90 transition-all"
-                  >
-                    Register
                   </Link>
                 </>
               )}
